@@ -4,7 +4,7 @@ import hashlib
 import os
 
 URL = "https://www.alexianer-krefeld.de/leistungen/kliniken/klinik-fuer-psychische-gesundheit/allgemeinpsychiatrie/fachambulanz-adhs"
-TARGET_TEXT_SNIPPET = "wir derzeit keine neuen Termine in unserer Ambulanz vergeben"
+TARGET_TEXT_SNIPPET = "keine neuen Termine in unserer Ambulanz vergeben"
 STATE_FILE = "last_hash.txt"
 
 def fetch_page():
@@ -15,7 +15,10 @@ def fetch_page():
 def extract_text(html):
     soup = BeautifulSoup(html, "html.parser")
     div = soup.find("div", class_="ce-text")
-    return div.get_text(strip=True) if div else ""
+    if div:
+        p = div.find("p")  # nur der erste Absatz zählt
+        return p.get_text(strip=True) if p else ""
+    return ""
 
 def compute_hash(text):
     return hashlib.sha256(text.encode()).hexdigest()
@@ -36,12 +39,18 @@ def send_telegram(msg):
 def main():
     html = fetch_page()
     text = extract_text(html)
+
+    # Debug-Ausgabe für GitHub Actions-Logs
+    print("---- Extracted Text ----")
+    print(repr(text))
+    print("------------------------")
+
     current_hash = compute_hash(text)
+    last_hash = read_last_hash()
 
     if TARGET_TEXT_SNIPPET not in text:
         send_telegram("⚠️ ADHS-Ambulanz Status hat sich geändert! Prüfe die Seite: " + URL)
 
-    last_hash = read_last_hash()
     if current_hash != last_hash:
         send_telegram("🔄 Änderung erkannt auf der ADHS-Ambulanz Seite.")
         save_hash(current_hash)
