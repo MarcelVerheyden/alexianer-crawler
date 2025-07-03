@@ -15,16 +15,18 @@ def fetch_page():
 
 def extract_text(html):
     soup = BeautifulSoup(html, "html.parser")
-    div = soup.find("div", class_="ce-text")
-    if div:
-        p = div.find("p")
-        if p:
-            text = p.get_text(separator=" ", strip=True)
-            # normalize whitespace
-            text = text.replace('\xa0', ' ')
-            text = re.sub(r'\s+', ' ', text)
-            return text.strip()
-    return ""
+    target_div = soup.find("div", id="c53864")
+    if not target_div:
+        return ""
+
+    ce_text_div = target_div.find("div", class_="ce-text")
+    if not ce_text_div:
+        return ""
+
+    text = ce_text_div.get_text(separator=" ", strip=True)
+    text = text.replace('\xa0', ' ')
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
 
 def compute_hash(text):
     return hashlib.sha256(text.encode()).hexdigest()
@@ -53,7 +55,6 @@ def main():
     last_hash = read_last_hash()
     current_hash = compute_hash(text)
 
-    # Wenn sich der Text ändert UND der Satz NICHT mehr enthalten ist, dann Nachricht schicken
     if current_hash != last_hash:
         if CHECK_PHRASE not in text:
             send_telegram("✅ Die Aufnahme auf die Warteliste ist wieder möglich! Bitte prüfen Sie die Webseite: " + URL)
