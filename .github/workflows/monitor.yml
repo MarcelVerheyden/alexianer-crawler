@@ -2,8 +2,10 @@ name: Check ADHS Page
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # alle 6 Stunden
-  workflow_dispatch:
+    - cron: '0 9 * * *'   # 9 Uhr
+    - cron: '0 12 * * *'  # 12 Uhr
+    - cron: '0 17 * * *'  # 17 Uhr
+  workflow_dispatch: 
 
 jobs:
   check_page:
