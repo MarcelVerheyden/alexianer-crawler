@@ -5,8 +5,8 @@ import os
 import re
 
 URL = "https://www.alexianer-krefeld.de/leistungen/kliniken/klinik-fuer-psychische-gesundheit/allgemeinpsychiatrie/fachambulanz-adhs"
-TARGET_TEXT_SNIPPET = "keine neuen Termine in unserer Ambulanz vergeben"
 STATE_FILE = "last_hash.txt"
+CHECK_PHRASE = "Eine Aufnahme auf die Warteliste kann daher zur Zeit nicht erfolgen"
 
 def fetch_page():
     response = requests.get(URL)
@@ -22,7 +22,7 @@ def extract_text(html):
             text = p.get_text(separator=" ", strip=True)
             # normalize whitespace
             text = text.replace('\xa0', ' ')
-            text = re.sub(r'\s+', ' ', text)  # replace multiple spaces/newlines with one
+            text = re.sub(r'\s+', ' ', text)
             return text.strip()
     return ""
 
@@ -50,14 +50,13 @@ def main():
     print(repr(text))
     print("------------------------")
 
-    current_hash = compute_hash(text)
     last_hash = read_last_hash()
+    current_hash = compute_hash(text)
 
-    if TARGET_TEXT_SNIPPET not in text:
-        send_telegram("⚠️ ADHS-Ambulanz Status hat sich geändert! Prüfe die Seite: " + URL)
-
+    # Wenn sich der Text ändert UND der Satz NICHT mehr enthalten ist, dann Nachricht schicken
     if current_hash != last_hash:
-        send_telegram("🔄 Änderung erkannt auf der ADHS-Ambulanz Seite.")
+        if CHECK_PHRASE not in text:
+            send_telegram("✅ Die Aufnahme auf die Warteliste ist wieder möglich! Bitte prüfen Sie die Webseite: " + URL)
         save_hash(current_hash)
 
 if __name__ == "__main__":
