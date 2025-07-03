@@ -1,17 +1,23 @@
-name: Check ADHS Page
+name: Check Alexianer Page
 
 on:
   schedule:
-    - cron: '0 9 * * *'   # 9 Uhr
-    - cron: '0 12 * * *'  # 12 Uhr
-    - cron: '0 17 * * *'  # 17 Uhr
-  workflow_dispatch: 
+    - cron: '0 9 * * *'    # 9 Uhr morgens
+    - cron: '0 12 * * *'   # 12 Uhr mittags
+    - cron: '0 17 * * *'   # 17 Uhr nachmittags
+  workflow_dispatch:       # Manuelles Starten möglich
 
 jobs:
   check_page:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Cache last_hash.txt
+        uses: actions/cache@v3
+        with:
+          path: last_hash.txt
+          key: last-hash-cache
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -26,3 +32,9 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python check_update.py
+
+      - name: Save last_hash.txt to cache
+        uses: actions/cache@v3
+        with:
+          path: last_hash.txt
+          key: last-hash-cache
