@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import hashlib
 import os
+import re
 
 URL = "https://www.alexianer-krefeld.de/leistungen/kliniken/klinik-fuer-psychische-gesundheit/allgemeinpsychiatrie/fachambulanz-adhs"
 TARGET_TEXT_SNIPPET = "keine neuen Termine in unserer Ambulanz vergeben"
@@ -16,8 +17,13 @@ def extract_text(html):
     soup = BeautifulSoup(html, "html.parser")
     div = soup.find("div", class_="ce-text")
     if div:
-        p = div.find("p")  # nur der erste Absatz zählt
-        return p.get_text(strip=True) if p else ""
+        p = div.find("p")
+        if p:
+            text = p.get_text(separator=" ", strip=True)
+            # normalize whitespace
+            text = text.replace('\xa0', ' ')
+            text = re.sub(r'\s+', ' ', text)  # replace multiple spaces/newlines with one
+            return text.strip()
     return ""
 
 def compute_hash(text):
@@ -40,7 +46,6 @@ def main():
     html = fetch_page()
     text = extract_text(html)
 
-    # Debug-Ausgabe für GitHub Actions-Logs
     print("---- Extracted Text ----")
     print(repr(text))
     print("------------------------")
