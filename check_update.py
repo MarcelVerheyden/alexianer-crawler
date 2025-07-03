@@ -58,7 +58,11 @@ def main():
     if current_hash != last_hash:
         if CHECK_PHRASE not in text:
             send_telegram("✅ Die Aufnahme auf die Warteliste ist wieder möglich! Bitte prüfen Sie die Webseite: " + URL)
+        else:
+            send_telegram("ℹ️ Es gab eine Änderung, aber der Satz ist weiterhin vorhanden.")
         save_hash(current_hash)
+    else:
+        send_telegram("ℹ️ Keine Änderung seit dem letzten Check.")
 
 if __name__ == "__main__":
     main()
