@@ -2,9 +2,8 @@ name: Check Alexianer Page
 
 on:
   schedule:
-    - cron: '0 9 * * *'    # 9 Uhr morgens
-    - cron: '0 12 * * *'   # 12 Uhr mittags
-    - cron: '0 17 * * *'   # 17 Uhr nachmittags
+    - cron: '0 8 * * *'    # 10 Uhr morgens
+    - cron: '0 16 * * *'   # 18 Uhr nachmittags
   workflow_dispatch:       # Manuelles Starten möglich
 
 jobs:
